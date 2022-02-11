@@ -151,6 +151,12 @@ menu[disabled="true"] {
     background-color: color-mix(in srgb, currentColor 20%, transparent) !important; /* Original: -moz-menuhover */
   }
 
+  menulist > menupopup > menuitem[_moz-menuactive="true"],
+  menulist > menupopup > menu[_moz-menuactive="true"] {
+    background-color: higlight !important;
+    color: higlighttext !important;
+  }
+
   #PlacesToolbar menu,
   #PlacesToolbar menuitem,
   #BMB_bookmarksPopup menu,
@@ -581,11 +587,11 @@ menu[disabled="true"] {
     > .tab-stack
     > .tab-background[multiselected]:not([selected]),
   :root:is([style*="--lwt-accent-color: rgb(240, 240, 244); --lwt-text-color: rgba(21, 20, 26);"], [style*="--lwt-accent-color: rgb(28, 27, 34); --lwt-text-color: rgba(251, 251, 254);"])
-       #tabbrowser-tabs:not([movingtab])
-                           > #tabbrowser-arrowscrollbox
-                           > .tabbrowser-tab
-                           > .tab-stack
-                           > .tab-background[multiselected]:not([selected]) {
+    #tabbrowser-tabs:not([movingtab])
+      > #tabbrowser-arrowscrollbox
+      > .tabbrowser-tab
+      > .tab-stack
+      > .tab-background[multiselected]:not([selected]) {
     background-image: linear-gradient(
         color-mix(in srgb, currentColor 11%, transparent),
         color-mix(in srgb, currentColor 11%, transparent)
@@ -790,7 +796,7 @@ menu[disabled="true"] {
   /*- Toolbar ----------------------------------------------------------------*/
   :root:not(:-moz-lwtheme) #navigator-toolbox,
   :root[lwt-default-theme-in-dark-mode] #navigator-toolbox {
-    appearance: auto !important;
+    background-color: var(--mac-bgcolor) !important;
   }
 
   :root:not(:-moz-lwtheme) #titlebar {
@@ -928,8 +934,12 @@ menu[disabled="true"] {
 
   --in-content-table-background: #f8f8fa;
   --in-content-table-border-color: var(--in-content-box-border-color); /* Legacy: #d1d1d1; rgba(249, 249, 250, 0.2) */
-  --in-content-table-header-background: var(--in-content-primary-button-background); /* Legacy: #0a84ff; rgb(5, 64, 150); */
-  --in-content-table-header-color: var(--in-content-primary-button-text-color); /* Legacy: #ffffff; var(--in-content-page-color); */
+  --in-content-table-header-background: var(
+    --in-content-primary-button-background
+  ); /* Legacy: #0a84ff; rgb(5, 64, 150); */
+  --in-content-table-header-color: var(
+    --in-content-primary-button-text-color
+  ); /* Legacy: #ffffff; var(--in-content-page-color); */
   --in-content-sidebar-width: 240px;
 
   --dialog-warning-text-color: var(--red-60);
@@ -1645,7 +1655,10 @@ browser[type="content"] > html {
     height: 12px !important;
   }
 
-  dropmarker::part(icon) {
+  /* dropmarker::part(icon)
+   * ::part is not apply chrome
+   */
+  dropmarker[exportparts="icon: dropmarker-icon"] {
     list-style-image: url("chrome://global/skin/icons/arrow-down.svg") !important;
     -moz-context-properties: fill !important;
     fill: currentColor !important;
@@ -2846,21 +2859,15 @@ menuitem.openintabs-menuitem,
 }
 
 /* Toolbar Height */
-:root:not([uidensity="touch"]) #TabsToolbar {
-  --toolbarbutton-inner-padding: 9px; /* Original: calc((var(--tab-min-height) - 16px) / 2) = 10px */
-}
-
-.toolbar-items,
-.tabbrowser-tab {
+#tabbrowser-arrowscrollbox {
   --tabbar-max-height: 38px;
   max-height: calc(var(--tabbar-max-height) + var(--space-above-tabbar));
 }
-:root[uidensity="compact"] .toolbar-items,
-:root[uidensity="compact"] .tabbrowser-tab {
-  --tabbar-max-height: 36px;
+
+:root[uidensity="compact"] #tabbrowser-arrowscrollbox {
+  --tabbar-max-height: 32px;
 }
-:root[uidensity="touch"] .toolbar-items,
-:root[uidensity="touch"] .tabbrowser-tab {
+:root[uidensity="touch"] #tabbrowser-arrowscrollbox {
   --tabbar-max-height: 45px;
 }
 
@@ -3010,6 +3017,11 @@ menupopup:not(.in-menulist) > menuitem,
 menupopup > menu {
   /* Original: 0.5em */
   padding-block: var(--menu-padding) !important;
+}
+
+#ContentSelectDropdown > menupopup > menucaption,
+#ContentSelectDropdown > menupopup > menuitem {
+  padding-block: 0 !important;
 }
 
 @supports not -moz-bool-pref("layout.css.osx-font-smoothing.enabled") {
@@ -3228,6 +3240,47 @@ menupopup > menu {
   box-shadow: 0 0 1px color-mix(in srgb, var(--toolbar-color) 80%, transparent) !important;
 }
 
+/* Consider 0 0 4px rgba(128,128,142,0.9) -> 0 0 4px rgba(0,0,0,.4) new default */
+#TabsToolbar:not([brighttext])
+  #tabbrowser-tabs:not([noshadowfortests])
+  .tabbrowser-tab:is([visuallyselected="true"], [multiselected])
+  > .tab-stack
+  > .tab-background {
+  box-shadow: 0 0 1px var(--tab-line-color, var(--lwt-tab-line-color, rgba(128, 128, 142, 0.9))),
+    0 0 4px rgba(128, 128, 142, 0.5) !important;
+}
+
+#TabsToolbar[brighttext]
+  #tabbrowser-tabs:not([noshadowfortests])
+  .tabbrowser-tab:is([visuallyselected="true"], [multiselected])
+  > .tab-stack
+  > .tab-background:-moz-lwtheme {
+  box-shadow: 0 0 1px var(--tab-line-color, var(--lwt-tab-line-color, rgba(128, 128, 142, 0.9))) !important;
+}
+
+/* For themes outside of Light and Dark (which are curated by Mozilla), show a thicker border
+   around the tab to help themes that are dependent on tab_line to show the selected tab. */
+:root:not([lwtheme-mozlightdark], [style*="--lwt-accent-color: rgb(240, 240, 244); --lwt-text-color: rgba(21, 20, 26);"])
+  #TabsToolbar:not([brighttext])
+  #tabbrowser-tabs:not([noshadowfortests])
+  .tabbrowser-tab:is([visuallyselected="true"], [multiselected])
+  > .tab-stack
+  > .tab-background:-moz-lwtheme {
+  box-shadow: 0 0 0 1px
+      var(--tab-line-color, var(--lwt-tab-line-color, var(--tabs-border-color, rgba(128, 128, 142, 0.9)))),
+    0 0 4px rgba(128, 128, 142, 0.5) !important;
+}
+
+:root:not([lwtheme-mozlightdark], [style*="--lwt-accent-color: rgb(28, 27, 34); --lwt-text-color: rgba(251, 251, 254);"])
+  #TabsToolbar[brighttext]
+  #tabbrowser-tabs:not([noshadowfortests])
+  .tabbrowser-tab:is([visuallyselected="true"], [multiselected])
+  > .tab-stack
+  > .tab-background:-moz-lwtheme {
+  box-shadow: 0 0 0 1px
+    var(--tab-line-color, var(--lwt-tab-line-color, var(--tabs-border-color, rgba(128, 128, 142, 0.9)))) !important;
+}
+
 /* Pinned Tab - tabbrowser-arrowscrollbox overflowing */
 #tabbrowser-tabs[positionpinnedtabs] > #tabbrowser-arrowscrollbox > .tabbrowser-tab[pinned] {
   z-index: 0 !important;
@@ -3255,7 +3308,10 @@ menupopup > menu {
 
   /* Color */
   fill: var(--toolbar-bgcolor) !important;
-  stroke: var(--tab-line-color, var(--tabs-border-color, rgba(128, 128, 142, 0.9))) !important;
+  stroke: var(
+    --tab-line-color,
+    var(--lwt-tab-line-color, var(--tabs-border-color, rgba(128, 128, 142, 0.9)))
+  ) !important;
   -moz-context-properties: fill, stroke !important;
 
   /* Image */
@@ -3263,8 +3319,17 @@ menupopup > menu {
   background-repeat: no-repeat;
   background-position-y: bottom;
 }
-:root:not([customizing="true"]) #TabsToolbar[brighttext] tab[visuallyselected] > stack::before,
-:root:not([customizing="true"]) #TabsToolbar[brighttext] tab[visuallyselected] > stack::after {
+
+:root:not([customizing="true"]):is([lwtheme-mozlightdark], [style*="--lwt-accent-color: rgb(28, 27, 34); --lwt-text-color: rgba(251, 251, 254);"])
+  #TabsToolbar[brighttext]
+  #tabbrowser-tabs:not([noshadowfortests])
+  tab[visuallyselected]
+  > stack:-moz-lwtheme::before,
+:root:not([customizing="true"]):is([lwtheme-mozlightdark], [style*="--lwt-accent-color: rgb(28, 27, 34); --lwt-text-color: rgba(251, 251, 254);"])
+  #TabsToolbar[brighttext]
+  #tabbrowser-tabs:not([noshadowfortests])
+  tab[visuallyselected]
+  > stack:-moz-lwtheme::after {
   /* As Selected Tab - Box Shadow */
   stroke: var(--toolbar-color) !important;
 }
